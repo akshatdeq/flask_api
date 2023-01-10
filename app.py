@@ -1,14 +1,19 @@
 from flask import Flask, request, jsonify
-from flask_sqlalchemy import SQLAlchemy
+import sqlalchemy
 from models import db, Employee
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:postgres@localhost/employee_management"
+app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:postgres@mypostgres:5432/employee_management"
 db.init_app(app)
 
 
 @app.before_first_request
 def create_table():
+    engine = sqlalchemy.create_engine("postgresql://postgres:postgres@mypostgres:5432")
+    conn = engine.connect()
+    conn.execute("commit")
+    conn.execute("create database employee_management;")
+    conn.close()
     db.create_all()
 
 
@@ -128,4 +133,4 @@ def delete_employee(employee_id):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=int("5000"))
