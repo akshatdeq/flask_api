@@ -1,21 +1,23 @@
 from flask import Flask, request, jsonify
-import sqlalchemy
+from sqlalchemy import create_engine
+from sqlalchemy_utils import database_exists, create_database
 from models import db, Employee
+from dotenv import load_dotenv
+import os
 
+
+load_dotenv()
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:postgres@127.0.0.1:5432/employee_management"
-# app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:postgres@127.0.0.1:5432/employee_management"
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DATABASE_URI"]
 db.init_app(app)
 
 
 @app.before_first_request
 def create_table():
-    engine = sqlalchemy.create_engine("postgresql://postgres:postgres@127.0.0.1:5432")
-    # engine = sqlalchemy.create_engine("postgresql://postgres:postgres@127.0.0.1:5432")
-    conn = engine.connect()
-    conn.execute("commit")
-    conn.execute("create database employee_management;")
-    conn.close()
+    engine = create_engine(os.environ["DATABASE_URI"])
+    if not database_exists(engine.url):
+        create_database(engine.url.database)
+    engine.dispose()
     db.create_all()
 
 

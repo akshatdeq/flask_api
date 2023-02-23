@@ -1,10 +1,12 @@
-FROM python:3.9.16-slim
+FROM python:3.8-alpine
 
 WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
 
-COPY . ./app
-RUN pip install -r ./app/requirements.txt
-
+COPY . .
+ENV FLASK_ENV=devlopment
+ENV DATABASE_URI=postgresql://postgres:postgres@172.17.0.2/employee_management
 EXPOSE 5000
 
-CMD ["python3", "./app/app.py", "--host=localhost"]
+CMD ["flask", "run", "--host=0.0.0.0"]
